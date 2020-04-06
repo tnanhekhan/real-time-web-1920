@@ -45,8 +45,19 @@ io.on('connection', function (socket) {
     });
 
     socket.on("chat message", msg => {
+        if (new RegExp("^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+").test(msg.trim())) {
+            let videoUrl;
+            const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = msg.match(regExp);
+            if (match && match[2].length == 11) {
+                videoUrl = match[2];
+            }
+
+            console.log(`youtube link: ${msg} url: ${videoUrl}`)
+        } else {
+            console.log(`message: ${msg}`)
+        }
         io.emit('chat message', msg);
-        console.log(`message: ${msg}`)
     });
 });
 
