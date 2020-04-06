@@ -3,6 +3,7 @@
 This is a basic chat-app made with Socket.io & Express that recognizes youtube links.
 
 [![Build Status](https://travis-ci.com/tnanhekhan/real-time-web-1920.svg?branch=staging)](https://travis-ci.com/tnanhekhan/real-time-web-1920)
+[![Heroku App Status](https://heroku-shields.herokuapp.com/live-tangle)](https://live-tangle.herokuapp.com)
 ## Goals
 - _Deal with real-time complexity_
 - _Handle real-time client-server interaction_
