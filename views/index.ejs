@@ -1,6 +1,33 @@
 <%- include ("./partials/head.ejs") %>
 
-<h1><%= title %></h1>
-<p>Welcome to <%= title %></p>
+<div>
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+</div>
 
+<ul id="messages"></ul>
+<form id="chat-bar" action="">
+    <input id="m" autocomplete="off"/>
+    <button>Send</button>
+</form>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    const messages = document.getElementById("messages");
+    const form = document.forms["chat-bar"]
+
+    form.addEventListener("submit", event => {
+        socket.emit('chat message', form.elements.m.value);
+        form.elements.m.value = "";
+        event.preventDefault(); // prevents page reloading
+    });
+
+    socket.on('chat message', msg => {
+        const message = document.createElement("li");
+        message.appendChild(document.createTextNode(msg));
+        messages.appendChild(message);
+    });
+
+</script>
 <%- include ("./partials/footer.ejs") %>

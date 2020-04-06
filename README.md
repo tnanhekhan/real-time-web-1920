@@ -2,6 +2,7 @@
 
 During this course you will learn how to build a **meaningful** real-time application. You will learn techniques to setup an open connection between the client and the server. This will enable you to send data in real-time both ways, at the same time.
 
+[![Build Status](https://travis-ci.com/tnanhekhan/real-time-web-1920.svg?branch=staging)](https://travis-ci.com/tnanhekhan/real-time-web-1920)
 ## Goals
 - _Deal with real-time complexity_
 - _Handle real-time client-server interaction_
@@ -10,7 +11,18 @@ During this course you will learn how to build a **meaningful** real-time applic
 
 [Rubric][rubric]
 
-## Curriculum
+## Installation
+Clone this repo with your favourite GIT CLI or GUI.  
+CD to the root of the project folder.  
+Run ` npm install ` to install this project and its necessary dependencies.  
+
+## Usage
+Run `npm dev` and go to `localhost:3000` to see the dev version running with nodemon.  
+Run `npm start` and go to `localhost:3000` to see the dev version running.
+
+
+## Live Version
+Here is a link to the live version on Heroku: https://live-tangle.herokuapp.com/
 
 ### Week 1 - Hello Server
 
