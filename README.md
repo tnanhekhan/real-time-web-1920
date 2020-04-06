@@ -9,8 +9,6 @@ This is a basic chat-app made with Socket.io & Express that recognizes youtube l
 - _Handle real-time data management_
 - _Handle multi-user support_
 
-[Rubric][rubric]
-
 ## Installation
 Clone this repo with your favourite GIT CLI or GUI.  
 CD to the root of the project folder.  
