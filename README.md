@@ -16,8 +16,8 @@ CD to the root of the project folder.
 Run ` npm install ` to install this project and its necessary dependencies.  
 
 ## Usage
-Run `npm dev` and go to `localhost:3000` to see the dev version running with nodemon.  
-Run `npm start` and go to `localhost:3000` to see the dev version running.
+Run `npm dev` and go to `localhost:3002` to see the dev version running with nodemon.  
+Run `npm start` and go to `localhost:3002` to see the dev version running.
 
 ## Live Version
 Here is a link to the live version on Heroku: https://live-tangle.herokuapp.com/
