@@ -4,6 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const http = require('http');
+const axios = require('axios').default;
 
 const indexRouter = require('./routes/index');
 const port = process.env.PORT || 3002;
@@ -38,6 +39,7 @@ app.use(function (err, req, res, next) {
     res.render('error');
 });
 
+// Setup Socket.IO
 io.on('connection', function (socket) {
     console.log('a user connected');
     socket.on('disconnect', () => {
@@ -45,19 +47,38 @@ io.on('connection', function (socket) {
     });
 
     socket.on("chat message", msg => {
-        if (new RegExp("^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+").test(msg.trim())) {
-            let videoUrl;
-            const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = msg.match(regExp);
-            if (match && match[2].length == 11) {
-                videoUrl = match[2];
-            }
+        const regExp = new RegExp("([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?");
+        if (regExp.test(msg)) {
+            const matchedSubstring = regExp.exec(msg)[0].split(" ");
+            const url = `https://noembed.com/embed?url=${matchedSubstring[0]}`;
+            const message = msg.replace(matchedSubstring[0], "");
 
-            console.log(`youtube link: ${msg} url: ${videoUrl}`)
+            axios.get(url)
+                .then(result => {
+                    if (!result.data.error) {
+                        // If url is valid youtube video, check if included message is before or after the video
+                        if (matchedSubstring.length > 1) {
+                            io.emit('chat message', `<li><a href='${result.data.url}'> ${result.data.title} from ${result.data["provider_name"]}</a> ${message}</li>`);
+                        } else {
+                            io.emit('chat message', `<li>${message}<a href='${result.data.url}'> ${result.data.title} from ${result.data["provider_name"]}</a></li>`);
+                        }
+                        io.emit('video', result.data.html)
+                    } else {
+                        // else check if included message is before or after the other url
+                        if (matchedSubstring.length > 1) {
+                            io.emit('chat message', `<li><a href='${result.data.url}'> ${result.data.url}</a> ${message}</li>`);
+                        } else {
+                            io.emit('chat message', `<li>${message} <a href='${result.data.url}'>${result.data.url}</a></li>`);
+                        }
+                    }
+                })
+                .catch(error => {
+                    io.emit('chat message', `<li>${msg}</li>`);
+                    console.log(error);
+                });
         } else {
-            console.log(`message: ${msg}`)
+            io.emit('chat message', `<li>${msg}</li>`);
         }
-        io.emit('chat message', msg);
     });
 });
 
