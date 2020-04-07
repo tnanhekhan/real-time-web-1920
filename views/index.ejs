@@ -1,14 +1,13 @@
 <%- include ("./partials/head.ejs") %>
 
-<div>
+<header>
     <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-</div>
-
+    <p>Welcome to <%= title %>. Try sending a YouTube video!</p>
+</header>
 <ul id="messages"></ul>
 <form id="chat-bar" action="">
-    <input id="m" autocomplete="off"/>
-    <button>Send</button>
+    <input id="m" autocomplete="off" placeholder="Enter a message" required/>
+    <button>SEND</button>
 </form>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -23,10 +22,16 @@
         event.preventDefault(); // prevents page reloading
     });
 
-    socket.on('chat message', msg => {
-        const message = document.createElement("li");
-        message.appendChild(document.createTextNode(msg));
+    socket.on('chat message', messageHtml => {
+        let message = new DOMParser().parseFromString(messageHtml, "text/html").firstChild.lastChild.firstChild;
         messages.appendChild(message);
+        messages.scrollIntoView(false)
+    });
+
+    socket.on('video', videoHtml => {
+        let video = new DOMParser().parseFromString(videoHtml, "text/html").lastChild.lastChild.firstChild
+        messages.appendChild(video);
+        messages.scrollIntoView(false)
     });
 
 </script>
