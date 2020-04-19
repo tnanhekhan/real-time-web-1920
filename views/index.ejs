@@ -1,38 +1,20 @@
 <%- include ("./partials/head.ejs") %>
 
-<header>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %>. Try sending a YouTube video!</p>
-</header>
-<ul id="messages"></ul>
-<form id="chat-bar" action="">
-    <input id="m" autocomplete="off" placeholder="Enter a message" required/>
-    <button>SEND</button>
-</form>
+<div class="container" id="map-container">
+    <div id="map" class="map"></div>
+</div>
 
+<!--<div class="container is-fluid" id="chatbox">-->
+<!--    <h2>Enter message here</h2>-->
+<!--    <ul id="messages"></ul>-->
+<!--    <form id="chat-bar" action="">-->
+<!--        <input id="m" autocomplete="off" placeholder="Enter a message" required/>-->
+<!--        <button>SEND</button>-->
+<!--    </form>-->
+<!--</div>-->
+
+<script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.3.1/build/ol.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ol-geocoder"></script>
 <script src="/socket.io/socket.io.js"></script>
-<script>
-    const socket = io();
-    const messages = document.getElementById("messages");
-    const form = document.forms["chat-bar"]
-
-    form.addEventListener("submit", event => {
-        socket.emit('chat message', form.elements.m.value);
-        form.elements.m.value = "";
-        event.preventDefault(); // prevents page reloading
-    });
-
-    socket.on('chat message', messageHtml => {
-        let message = new DOMParser().parseFromString(messageHtml, "text/html").firstChild.lastChild.firstChild;
-        messages.appendChild(message);
-        messages.scrollIntoView(false)
-    });
-
-    socket.on('video', videoHtml => {
-        let video = new DOMParser().parseFromString(videoHtml, "text/html").lastChild.lastChild.firstChild
-        messages.appendChild(video);
-        messages.scrollIntoView(false)
-    });
-
-</script>
+<script type="module" src="/js/app.js"></script>
 <%- include ("./partials/footer.ejs") %>
