@@ -1,4 +1,4 @@
-#A Collaborative Parking Space Manager
+# A Collaborative Parking Space Manager
 
 This is an web app where you can manage the available parking spaces within the municipality of Amsterdam with other people.
 
