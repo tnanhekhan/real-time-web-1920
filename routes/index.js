@@ -5,7 +5,7 @@ const router = express.Router();
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
-  res.render('index', { title: 'Parkingfinder' });
+  res.render('index', { title: 'A Collaborative Parking Space Manager' });
 });
 
 module.exports = router;
