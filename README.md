@@ -1,6 +1,6 @@
-# Real-Time Web @cmda-minor-web · 2019-2020
+#A Collaborative Parking Space Manager
 
-This is a basic chat-app made with Socket.io & Express that recognizes web links and embeds Youtube videos to the chat.
+This is an web app where you can manage the available parking spaces within the municipality of Amsterdam with other people.
 
 [![Build Status](https://travis-ci.com/tnanhekhan/real-time-web-1920.svg?branch=staging)](https://travis-ci.com/tnanhekhan/real-time-web-1920)
 [![Heroku App Status](https://heroku-shields.herokuapp.com/live-tangle)](https://live-tangle.herokuapp.com)
