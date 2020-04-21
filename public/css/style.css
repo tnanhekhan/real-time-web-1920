@@ -1,5 +1,9 @@
 .map {
-    margin: 0;
-    height: 80vh;
+    border: none;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 94vh;
     width: 100%;
 }
