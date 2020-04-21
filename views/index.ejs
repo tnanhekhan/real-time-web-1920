@@ -1,17 +1,104 @@
 <%- include ("./partials/head.ejs") %>
+<aside id="chat">
+    <p class="menu-label side-menu-title">
+        Chat
+    </p>
+    <a class="button is-small is-outlined is-danger close-side-button" href="#" id="close-chat-button">
+        <span class="icon is-medium">
+            <i class="fas fa-times-circle"></i>
+        </span>
+    </a>
+    <div class="container is-fluid" id="chat-container">
+        <div class="field is-grouped is-grouped-multiline">
+            <p class="control">
+                <a class="button">
+                    Centrum
+                </a>
+            </p>
+            <p class="control">
+                <a class="button">
+                    Nieuw-West
+                </a>
+            </p>
+            <p class="control">
+                <a class="button">
+                    Noord
+                </a>
+            </p>
+            <p class="control">
+                <a class="button">
+                    Oost
+                </a>
+            </p>
+            <p class="control">
+                <a class="button">
+                    West
+                </a>
+            </p>
+            <p class="control">
+                <a class="button">
+                    Zuid
+                </a>
+            </p>
+            <p class="control">
+                <a class="button">
+                    Zuidoost
+                </a>
+            </p>
+        </div>
+        <div class="container box" id="chatbox">
+            <div class="tile-header">
+                <h1 class="title is-4">Room</h1>
+                <h1 class="subtitle is-6">Centrum</h1>
+            </div>
+            <hr>
+            <ul id="messages"></ul>
+        </div>
+        <form id="chat-bar" action="">
+            <div class="field has-addons">
+                <div class="control is-expanded">
+                    <input class="input" type="text" id="m" autocomplete="off" placeholder="Enter a message" required/>
+                </div>
+                <div class="control">
+                    <a class="button is-primary">Send</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</aside>
+
+<aside id="parking-spaces">
+    <p class="menu-label side-menu-title">
+        Parking Spaces
+    </p>
+    <a class="button is-small is-outlined is-danger close-side-button" href="#" id="close-parking-spaces-button">
+        <span class="icon is-medium">
+            <i class="fas fa-times-circle"></i>
+        </span>
+    </a>
+</aside>
 
 <div id="map-container">
     <div id="map" class="map"></div>
+    <div id="parking-space-info" class="notification content">
+        <button id="parking-space-info-dismiss" class="delete"></button>
+        <p id="parking-space-info-title" class="title">Vertical...</p>
+        <p id="parking-space-info-subtitle" class="subtitle">Top tile</p>
+        <figure class="image">
+            <img id="parking-space-info-image" src="https://bulma.io/images/placeholders/640x480.png">
+        </figure>
+        <p id="parking-space-info-content">
+            Lorem ipsum dolor sit amet, consectetur
+            adipiscing elit lorem ipsum dolor. <strong>Pellentesque risus mi</strong>, tempus quis placerat ut, porta
+            nec
+            nulla. Vestibulum rhoncus ac ex sit amet fringilla. Nullam gravida purus diam, et dictum <a>felis
+                venenatis</a>
+            efficitur. Sit amet,
+            consectetur adipiscing elit
+        </p>
+        <button class="button is-medium is-fullwidth is-info">Claim</button>
+    </div>
 </div>
-
-<!--<div class="container is-fluid" id="chatbox">-->
-<!--    <h2>Enter message here</h2>-->
-<!--    <ul id="messages"></ul>-->
-<!--    <form id="chat-bar" action="">-->
-<!--        <input id="m" autocomplete="off" placeholder="Enter a message" required/>-->
-<!--        <button>SEND</button>-->
-<!--    </form>-->
-<!--</div>-->
 
 <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.3.1/build/ol.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ol-geocoder"></script>
