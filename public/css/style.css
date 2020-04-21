@@ -41,7 +41,7 @@ aside {
     overflow-x: hidden;
     overflow-y: hidden;
     padding-top: 56px;
-    transition: 0.6s;
+    transition: 0.5s;
 }
 
 aside .close-side-button {

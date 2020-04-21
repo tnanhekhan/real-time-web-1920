@@ -103,17 +103,20 @@ function closeSideMenu(menu) {
 // Get Lat Long from click
 // map.on('click', evt => console.log(evt.coordinate))
 map.on('click', (evt) =>{
-    // https://api.data.amsterdam.nl endpoint
-    //https://api.data.amsterdam.nl/parkeervakken/geosearch/?lat=52.3458067&lon=4.9030355&item=parkeervak api for geoloc
     const coords = ol.proj.toLonLat(evt.coordinate);
     const lat = coords[1];
     const lng = coords[0];
 
-    const infoElements = parkingSpaceInfo.children;
-    infoElements["parking-space-info-title"].innerHTML = `lat: ${lat} lng: ${lng}`;
+    fetch(`geo?lat=${lat}&lng=${lng}`)
+        .then(response => {
+            return response.json()
+        })
+        .then(data => {
+            const infoElements = parkingSpaceInfo.children;
+            infoElements["parking-space-info-title"].innerHTML = data.title;
+            infoElements["parking-space-info-subtitle"].innerHTML = data.subtitle;
+            parkingSpaceInfo.style.display = "block";
+        });
 
-    parkingSpaceInfo.style.display = "block";
 });
-
-
 // endregion
