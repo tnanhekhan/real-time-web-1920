@@ -1,4 +1,3 @@
-// region dependencies
 const socket = io();
 const messages = document.getElementById("messages");
 const form = document.forms["chat-bar"]
@@ -8,7 +7,6 @@ const closeChatButton = document.getElementById("close-chat-button");
 
 const openParkingSpacesButton = document.getElementById("open-parking-spaces-button");
 const closeParkingSpacesButton = document.getElementById("close-parking-spaces-button");
-// endregion
 
 // region chat logic
 form.addEventListener("submit", event => {
@@ -31,25 +29,25 @@ socket.on('video', videoHtml => {
 //endregion
 
 // region map logic
+let wmsSource = new ol.layer.Tile({
+    source: new ol.source.TileWMS({
+        // url: 'https://map.data.amsterdam.nl/maps/parkeervakken?service=WMS&request=GetMap&version=1.1.1&layers=alle_parkeervakken%2Cparkeervakken_label&styles=&format=image%2Fpng&transparent=true&identify=false&onLoading=function(t)%7Bvar%20n%3Dt.sourceTarget%3Breturn%20e.handleLoading(n)%7D&onLoad=function(t)%7Bvar%20n%3Dt.sourceTarget%3Breturn%20e.handleLoaded(n)%7D&srs=EPSG%3A28992&width=480&height=949&bbox=121314.31038026694,485028.8119350978,121515.9456401163,485427.7690752142',
+        url: 'https://map.data.amsterdam.nl/maps/parkeervakken?service=WMS&request=GetMap&version=1.1.1',
+        params: {"layers": "alle_parkeervakken"},
+        crossOrigin: "anonymous",
+        serverType: "geoServer"
+    })
+});
+
+let mapView = new ol.View({
+    center: ol.proj.fromLonLat([4.895168, 52.370216]),
+    zoom: 14
+});
+
 let map = new ol.Map({
     target: 'map',
-    layers: [
-        new ol.layer.Tile({
-            source: new ol.source.OSM()
-        }),
-        new ol.layer.Tile({
-            source: new ol.source.TileWMS({
-                // url: 'https://map.data.amsterdam.nl/maps/parkeervakken?service=WMS&request=GetMap&version=1.1.1&layers=alle_parkeervakken%2Cparkeervakken_label&styles=&format=image%2Fpng&transparent=true&identify=false&onLoading=function(t)%7Bvar%20n%3Dt.sourceTarget%3Breturn%20e.handleLoading(n)%7D&onLoad=function(t)%7Bvar%20n%3Dt.sourceTarget%3Breturn%20e.handleLoaded(n)%7D&srs=EPSG%3A28992&width=480&height=949&bbox=121314.31038026694,485028.8119350978,121515.9456401163,485427.7690752142',
-                url: 'https://map.data.amsterdam.nl/maps/parkeervakken?service=WMS&request=GetMap&version=1.1.1',
-                params: {"layers": "alle_parkeervakken"},
-                crossOrigin: "anonymous"
-            })
-        })
-    ],
-    view: new ol.View({
-        center: ol.proj.fromLonLat([4.895168, 52.370216]),
-        zoom: 14
-    })
+    layers: [new ol.layer.Tile({source: new ol.source.OSM()}), wmsSource],
+    view: mapView
 });
 
 // https://github.com/jonataswalker/ol-geocoder
@@ -112,11 +110,47 @@ map.on('click', (evt) =>{
             return response.json()
         })
         .then(data => {
+            // Renders parking space claim box
             const infoElements = parkingSpaceInfo.children;
-            infoElements["parking-space-info-title"].innerHTML = data.title;
-            infoElements["parking-space-info-subtitle"].innerHTML = data.subtitle;
+            infoElements["parking-space-info-title"].innerHTML = data.type;
+            infoElements["parking-space-info-subtitle"].innerHTML = data.id;
+            infoElements["parking-space-info-content"].innerHTML = data.details;
+
+            if (!data.isParkingSpace) {
+                infoElements["parking-space-claim-button"].style.display = "none";
+            } else {
+                infoElements["parking-space-claim-button"].style.display = "block";
+            }
+
+            infoElements["parking-space-claim-button"].onclick = () => {
+                let point = new ol.geom.Point(evt.coordinate);
+                let claimedParkingSpace = new ol.Feature({
+                    geometry: point,
+                    id: data.id,
+                    details: data.details,
+                    type: data.type
+                });
+
+                claimedParkingSpace.setStyle(new ol.style.Style({
+                    image: new ol.style.Icon(({
+                        crossOrigin: 'anonymous',
+                        src: '/img/car.png',
+                        scale: 0.5
+                    }))
+                }));
+
+                let claimedParkingSpaceVector = new ol.source.Vector({
+                    features: [claimedParkingSpace]
+                })
+
+                let claimedParkingSpaceLayer = new ol.layer.Vector({
+                    source: claimedParkingSpaceVector
+                })
+
+                map.addLayer(claimedParkingSpaceLayer)
+            };
+
             parkingSpaceInfo.style.display = "block";
         });
-
 });
 // endregion

@@ -1,14 +1,20 @@
+html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden
+}
+
 .map {
     border: none;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 94vh;
+    height: 97vh;
     width: 100%;
 }
 
-#parking-space-info{
+#parking-space-info {
     z-index: 1;
     position: absolute;
     bottom: 24px;
@@ -17,16 +23,16 @@
     display: none;
 }
 
-#chat-container{
-height: 95%;
+#chat-container {
+    height: 95%;
 }
 
 #chatbox {
     height: 80%;
 }
 
-#messages{
-    height: 100%;
+#messages {
+    height: 85%;
     overflow-y: auto;
 }
 
