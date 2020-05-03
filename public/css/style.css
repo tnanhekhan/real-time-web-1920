@@ -1,9 +1,75 @@
+html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden
+}
+
 .map {
     border: none;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 94vh;
+    height: 97vh;
     width: 100%;
+}
+
+#parking-space-info {
+    z-index: 1;
+    position: absolute;
+    bottom: 24px;
+    left: 16px;
+    width: 20%;
+    display: none;
+}
+
+#chat-container {
+    height: 95%;
+}
+
+#chatbox {
+    height: 80%;
+}
+
+#messages {
+    height: 85%;
+    overflow-y: auto;
+}
+
+aside {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    background-color: white;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    padding-top: 56px;
+    transition: 0.5s;
+}
+
+aside .close-side-button {
+    position: absolute;
+    top: 58px;
+    right: 4px;
+}
+
+aside .side-menu-title {
+    margin: 4px;
+}
+
+aside form {
+    vertical-align: bottom;
+}
+
+@media screen and (max-height: 450px) {
+    aside {
+        padding-top: 15px;
+    }
+
+    aside a {
+        font-size: 18px;
+    }
 }

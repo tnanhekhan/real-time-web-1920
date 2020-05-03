@@ -17,22 +17,30 @@
         <a class="navbar-item" href="/">
             <h1><%= title %></h1>
         </a>
+        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
     </div>
-    <div class="navbar-end">
-        <div class="navbar-item">
-            <div class="buttons">
-                <a class="button navbar-item">
+    <div class="navbar-menu">
+        <div class="navbar-end">
+            <div class="navbar-item">
+                <div class="buttons is-centered">
+                    <a class="button is-outlined" id="open-parking-spaces-button">
                     <span class="icon">
                         <i class="fas fa-parking"></i>
                     </span>
-                    <span>Parking Spaces</span>
-                </a>
-                <a class="button navbar-item">
+                        <span>Parking Spaces</span>
+                    </a>
+                    <a class="button is-outlined" id="open-chat-button">
                     <span class="icon">
                         <i class="fas fa-comments"></i>
                     </span>
-                    <span>Chat</span>
-                </a>
+                        <span>Chat</span>
+                    </a>
+                </div>
             </div>
         </div>
+    </div>
 </nav>
