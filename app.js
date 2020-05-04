@@ -12,6 +12,8 @@ const port = process.env.PORT || 3002;
 const app = express();
 const server = http.createServer(app);
 const io = require('socket.io')(server);
+const MongoDB = require("./data/db.js");
+const ParkingSpace = MongoDB.ParkingSpaceModel;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
@@ -40,7 +42,15 @@ app.use(function (err, req, res, next) {
 });
 
 // region Socket.IO
-io.on('connection', function (socket) {
+io.on('connection', socket => {
+    MongoDB.client.connect(MongoDB.uri, {useNewUrlParser: true, useUnifiedTopology: true});
+    MongoDB.db.on('error', console.error.bind(console, 'connection error:'));
+    MongoDB.db.once('open', () => {
+        ParkingSpace.find({isClaimed: true}, (err, parkingSpaces) => {
+            io.emit("fetch", parkingSpaces);
+        });
+    });
+
     console.log('a user connected');
     socket.on('disconnect', () => {
         console.log('user disconnected');
@@ -79,6 +89,44 @@ io.on('connection', function (socket) {
         } else {
             io.emit('chat message', `<li>${msg}</li>`);
         }
+    });
+
+    socket.on("claim", parkingSpace => {
+        MongoDB.client.connect(MongoDB.uri, {useNewUrlParser: true, useUnifiedTopology: true});
+        MongoDB.db.on('error', console.error.bind(console, 'connection error:'));
+        MongoDB.db.once('open', () => {
+            let claimedParkingSpace = new ParkingSpace({
+                id: parkingSpace.id,
+                coordinates: parkingSpace.coordinates,
+                details: parkingSpace.details,
+                name: parkingSpace.name,
+                isClaimed: true
+            });
+
+            ParkingSpace.find({id: (parkingSpace.id).toString()}, (err, docs) => {
+                if (docs.length) {
+                    ParkingSpace.updateOne({id: parkingSpace.id.toString()}, {isClaimed: true}, (err, res) => {
+                        if (err) return console.error(err);
+                        io.emit("claim", parkingSpace);
+                    });
+                } else {
+                    claimedParkingSpace.save(err => {
+                        if (err) return console.error(err);
+                        io.emit("claim", parkingSpace);
+                    });
+                }
+            });
+        });
+    });
+
+    socket.on("unclaim", parkingSpaceId => {
+        MongoDB.client.connect(MongoDB.uri, {useNewUrlParser: true, useUnifiedTopology: true});
+        MongoDB.db.on('error', console.error.bind(console, 'connection error:'));
+        MongoDB.db.once('open', () => {
+            ParkingSpace.updateOne({id: parkingSpaceId.toString()}, {isClaimed: false}, (err, res) => {
+                io.emit("unclaim", parkingSpaceId);
+            });
+        });
     });
 });
 // endregion
