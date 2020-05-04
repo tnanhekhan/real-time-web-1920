@@ -5,6 +5,8 @@ This is an web app where you can manage the available parking spaces within the 
 [![Build Status](https://travis-ci.com/tnanhekhan/real-time-web-1920.svg?branch=staging)](https://travis-ci.com/tnanhekhan/real-time-web-1920)
 [![Heroku App Status](https://heroku-shields.herokuapp.com/live-tangle)](https://live-tangle.herokuapp.com)
 
+![Poster](docs/poster.png "Poster")
+
 ## Installation
 Clone this repo with your favourite GIT CLI or GUI.  
 CD to the root of the project folder.  
