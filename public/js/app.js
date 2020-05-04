@@ -28,7 +28,7 @@ socket.on('video', videoHtml => {
 });
 //endregion
 
-// region map logic
+// region map dependencies
 let wmsSource = new ol.layer.Tile({
     source: new ol.source.TileWMS({
         // url: 'https://map.data.amsterdam.nl/maps/parkeervakken?service=WMS&request=GetMap&version=1.1.1&layers=alle_parkeervakken%2Cparkeervakken_label&styles=&format=image%2Fpng&transparent=true&identify=false&onLoading=function(t)%7Bvar%20n%3Dt.sourceTarget%3Breturn%20e.handleLoading(n)%7D&onLoad=function(t)%7Bvar%20n%3Dt.sourceTarget%3Breturn%20e.handleLoaded(n)%7D&srs=EPSG%3A28992&width=480&height=949&bbox=121314.31038026694,485028.8119350978,121515.9456401163,485427.7690752142',
@@ -54,18 +54,20 @@ let map = new ol.Map({
 let geoCoder = new Geocoder('nominatim', {
     provider: 'osm',
     lang: 'nl-NL',
-    placeholder: 'Toets hier uw locatie in:',
+    placeholder: 'Enter your location:',
     targetType: 'glass-button',
     limit: 10,
     keepOpen: true
 });
 
-map.addControl(geoCoder);
+let claimedParkingSpaceVector = new ol.source.Vector()
 
-// geocoding callback
-geoCoder.on('addresschosen', evt => {
-    console.log("cool")
-});
+let claimedParkingSpaceLayer = new ol.layer.Vector({
+    source: claimedParkingSpaceVector
+})
+
+map.addLayer(claimedParkingSpaceLayer);
+map.addControl(geoCoder);
 // endregion
 
 // region click listeners
@@ -83,6 +85,23 @@ parkingSpaceDismissButton.addEventListener("click", () => {
     parkingSpaceInfo.style.display = "none";
 });
 
+document.addEventListener("click", (e) => {
+    if (e.target && e.target.className.includes("go-to-button")) {
+        const coordsString = e.target.dataset.coords.split(",");
+        const coords = [Number(coordsString[0]), Number(coordsString[1])]
+        const latLng = ol.proj.toLonLat(coords);
+        const lat = latLng[1];
+        const lng = latLng[0];
+
+        mapView.animate({
+            center: coords,
+            zoom: 21,
+            duration: 2000,
+        });
+        showParkingSpaceInfo(lat, lng, coords);
+    }
+});
+
 function openSideMenu(menu, otherOpenMenu) {
     if (otherOpenMenu.dataset.open) {
         otherOpenMenu.dataset.open = false;
@@ -98,59 +117,130 @@ function closeSideMenu(menu) {
     menu.style.width = "0";
 }
 
-// Get Lat Long from click
-// map.on('click', evt => console.log(evt.coordinate))
-map.on('click', (evt) =>{
-    const coords = ol.proj.toLonLat(evt.coordinate);
-    const lat = coords[1];
-    const lng = coords[0];
+function showParkingSpaceInfo(lat, lng, coords) {
+    document.getElementById("loader").style.display = "block";
+    parkingSpaceInfo.style.display = "none";
 
     fetch(`geo?lat=${lat}&lng=${lng}`)
         .then(response => {
             return response.json()
         })
         .then(data => {
-            // Renders parking space claim box
+            document.getElementById("loader").style.display = "none";
             const infoElements = parkingSpaceInfo.children;
-            infoElements["parking-space-info-title"].innerHTML = data.type;
-            infoElements["parking-space-info-subtitle"].innerHTML = data.id;
-            infoElements["parking-space-info-content"].innerHTML = data.details;
+            if (data.isParkingSpace) {
+                infoElements["parking-space-info-title"].innerHTML = data.name;
+                infoElements["parking-space-info-subtitle"].innerHTML = data.id;
+                infoElements["parking-space-info-content"].innerHTML = data.details;
+                document.getElementById("parking-space-info-thumb").src = data.thumb;
 
-            if (!data.isParkingSpace) {
-                infoElements["parking-space-claim-button"].style.display = "none";
-            } else {
-                infoElements["parking-space-claim-button"].style.display = "block";
-            }
-
-            infoElements["parking-space-claim-button"].onclick = () => {
-                let point = new ol.geom.Point(evt.coordinate);
-                let claimedParkingSpace = new ol.Feature({
-                    geometry: point,
-                    id: data.id,
-                    details: data.details,
-                    type: data.type
+                let isClaimed;
+                Array.from(document.getElementById("parking-space-available-container").children).forEach(child => {
+                    if (child.id === data.id) {
+                        isClaimed = true
+                    }
                 });
 
-                claimedParkingSpace.setStyle(new ol.style.Style({
-                    image: new ol.style.Icon(({
-                        crossOrigin: 'anonymous',
-                        src: '/img/car.png',
-                        scale: 0.5
-                    }))
-                }));
+                if (isClaimed) {
+                    infoElements["parking-space-claim-button"].style.display = "none";
+                    infoElements["parking-space-unclaim-button"].style.display = "block";
+                } else {
+                    infoElements["parking-space-claim-button"].style.display = "block";
+                    infoElements["parking-space-unclaim-button"].style.display = "none";
+                }
 
-                let claimedParkingSpaceVector = new ol.source.Vector({
-                    features: [claimedParkingSpace]
-                })
+                infoElements["parking-space-claim-button"].onclick = () => {
+                        socket.emit("claim", {
+                            coordinates: coords,
+                            id: data.id,
+                            details: data.details,
+                            name: data.name
+                        });
 
-                let claimedParkingSpaceLayer = new ol.layer.Vector({
-                    source: claimedParkingSpaceVector
-                })
+                    infoElements["parking-space-claim-button"].style.display = "none";
+                    infoElements["parking-space-unclaim-button"].style.display = "block";
+                };
 
-                map.addLayer(claimedParkingSpaceLayer)
-            };
-
-            parkingSpaceInfo.style.display = "block";
+                infoElements["parking-space-unclaim-button"].onclick = () => {
+                    socket.emit("unclaim", data.id);
+                    infoElements["parking-space-claim-button"].style.display = "block";
+                    infoElements["parking-space-unclaim-button"].style.display = "none";
+                };
+                parkingSpaceInfo.style.display = "block";
+            }
         });
+}
+
+// Get Lat Long from click
+map.on('click', (evt) => {
+    const coords = ol.proj.toLonLat(evt.coordinate);
+    const lat = coords[1];
+    const lng = coords[0];
+
+    parkingSpaceInfo.style.display = "none";
+    history.replaceState(null, null, ' ');
+    showParkingSpaceInfo(lat, lng, evt.coordinate);
 });
+
+//endregion
+
+//region map socket events
+function addParkingSpaceToVector(parkingSpace) {
+    const claimedParkingSpace = new ol.Feature({
+        geometry: new ol.geom.Point(parkingSpace.coordinates),
+        details: parkingSpace.details,
+        name: parkingSpace.name
+    });
+
+    claimedParkingSpace.setId(parkingSpace.id);
+    claimedParkingSpace.setStyle(new ol.style.Style({
+        image: new ol.style.Icon(({
+            crossOrigin: 'anonymous',
+            src: '/img/car.png',
+            scale: 0.5
+        }))
+    }));
+
+    claimedParkingSpaceVector.addFeature(claimedParkingSpace);
+}
+
+function insertIntoParkingSpaceList(parkingSpace) {
+    document.getElementById("parking-space-available-container").insertAdjacentHTML("beforeend",
+        `<div class="card" id="${parkingSpace.id}" >
+            <header class="card-header">
+                <p class="card-header-title">
+                ${parkingSpace.name}
+                </p>
+                <a class="card-header-icon">
+                    <button class="button is-medium is-link go-to-button" data-coords="${parkingSpace.coordinates}">
+                    Go to
+                    </button>
+                </a>
+            </header>
+            <div class="card-content">
+                <p class="title is-6">${parkingSpace.id}</p>
+                <p class="media-content">${parkingSpace.details}</p>
+            </div>
+        </div>`)
+}
+
+socket.on("claim", parkingSpace => {
+    addParkingSpaceToVector(parkingSpace);
+    insertIntoParkingSpaceList(parkingSpace);
+    map.render();
+});
+
+socket.on("unclaim", parkingSpaceId => {
+    document.getElementById(parkingSpaceId).remove();
+    claimedParkingSpaceVector.removeFeature(claimedParkingSpaceVector.getFeatureById(parkingSpaceId));
+    map.render();
+});
+
+socket.on("fetch", parkingSpaces => {
+    parkingSpaces.forEach(parkingSpace => {
+        addParkingSpaceToVector(parkingSpace)
+        insertIntoParkingSpaceList(parkingSpace);
+    });
+    map.render();
+})
 // endregion

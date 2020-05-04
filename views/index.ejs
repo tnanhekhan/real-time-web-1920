@@ -3,7 +3,7 @@
     <p class="menu-label side-menu-title">
         Chat
     </p>
-    <a class="button is-small is-outlined is-danger close-side-button" href="#" id="close-chat-button">
+    <a class="button is-small is-outlined is-danger close-side-button" id="close-chat-button">
         <span class="icon is-medium">
             <i class="fas fa-times-circle"></i>
         </span>
@@ -76,6 +76,8 @@
             <i class="fas fa-times-circle"></i>
         </span>
     </a>
+    <div class="container is-fluid" id="parking-space-available-container">
+    </div>
 </aside>
 
 <div id="map-container">
@@ -84,11 +86,15 @@
         <button id="parking-space-info-dismiss" class="delete"></button>
         <p id="parking-space-info-title" class="title"></p>
         <p id="parking-space-info-subtitle" class="subtitle"></p>
-        <p id="parking-space-info-content">
-        </p>
-        <button id="parking-space-claim-button" class="button is-medium is-fullwidth is-info">Claim</button>
+        <img id="parking-space-info-thumb" src="https://bulma.io/images/placeholders/128x128.png"
+             alt="Parking Space Thumbnail">
+        <p id="parking-space-info-content"></p>
+        <button id="parking-space-claim-button" class="button is-medium is-fullwidth is-primary">Claim</button>
+        <button id="parking-space-unclaim-button" class="button is-medium is-fullwidth is-danger">Unclaim</button>
     </div>
 </div>
+
+<div class="lds-ripple" id="loader"><div></div><div></div></div>
 
 <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.3.1/build/ol.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/ol-geocoder"></script>
