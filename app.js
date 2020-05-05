@@ -47,7 +47,7 @@ io.on('connection', socket => {
     MongoDB.db.on('error', console.error.bind(console, 'connection error:'));
     MongoDB.db.once('open', () => {
         ParkingSpace.find({isClaimed: true}, (err, parkingSpaces) => {
-            io.emit("fetch", parkingSpaces);
+            io.emit("fetch claimedParkingSpaces", parkingSpaces);
         });
     });
 
@@ -89,6 +89,33 @@ io.on('connection', socket => {
         } else {
             io.emit('chat message', `<li>${msg}</li>`);
         }
+    });
+
+    socket.on("fetch parkingSpaceInfo", data => {
+        const endpoint = "https://api.data.amsterdam.nl";
+        axios.get(`${endpoint}/parkeervakken/geosearch/?lat=${data.lat}&lon=${data.lng}&item=parkeervak`)
+            .then(geoSearch => {
+                const infoUrl = geoSearch.data[0]["_links"].self.href;
+                const multiPolygon = geoSearch.data[0].geometrie.coordinates;
+
+                axios.get(endpoint + infoUrl)
+                    .then(response => {
+                        axios.get(`https://api.data.amsterdam.nl/panorama/thumbnail/?lat=${data.lat}&lon=${data.lng}`)
+                            .then(thumbnail => {
+                                socket.emit("fetch parkingSpaceInfo", {
+                                    isParkingSpace: true,
+                                    name: `${response.data.straatnaam}`,
+                                    id: response.data.id,
+                                    details: `Type: ${response.data.type} Parking Space, Buurtcode: ${response.data.buurtcode}`,
+                                    multiPolygon: multiPolygon,
+                                    thumb: thumbnail.data.url
+                                });
+                            });
+                    });
+
+            }).catch(err => {
+            socket.emit("fetch parkingSpaceInfo", {isParkingSpace: false});
+        });
     });
 
     socket.on("claim", parkingSpace => {
