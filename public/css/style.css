@@ -64,8 +64,13 @@ aside form {
     overflow-y: auto;
 }
 
-#parking-spaces {
+#parking-space-available-container {
     overflow-y: auto;
+    height: 100%;
+}
+
+#parking-space-available-container > :last-child {
+    margin-bottom: 3em;
 }
 
 .card {
@@ -78,6 +83,10 @@ aside form {
 
 #loader {
     display: none;
+}
+
+#chat-username-container{
+    margin: 16px;
 }
 
 .lds-ripple {

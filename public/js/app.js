@@ -1,6 +1,8 @@
 const socket = io();
 const messages = document.getElementById("messages");
-const form = document.forms["chat-bar"]
+const chatInput = document.forms["chat-bar"]
+const chatUsernameInput = document.forms["chat-username-form"];
+const roomButtons = document.querySelectorAll(".room-button");
 
 const openChatButton = document.getElementById("open-chat-button");
 const closeChatButton = document.getElementById("close-chat-button");
@@ -9,13 +11,44 @@ const openParkingSpacesButton = document.getElementById("open-parking-spaces-but
 const closeParkingSpacesButton = document.getElementById("close-parking-spaces-button");
 
 // region chat logic
-form.addEventListener("submit", event => {
-    socket.emit('chat message', form.elements.m.value);
-    form.elements.m.value = "";
+document.getElementById("chat-container").style.display = "none";
+document.getElementById("chat-username-container").style.display = "block";
+
+chatUsernameInput.addEventListener("submit", event => {
+    socket.emit('set username', chatUsernameInput.elements["chat-username-input"].value);
+    chatUsernameInput.elements["chat-username-input"].value = "";
     event.preventDefault(); // prevents page reloading
 });
 
+chatInput.addEventListener("submit", event => {
+    socket.emit('chat message', {
+        message: chatInput.elements.m.value,
+        room: document.getElementById("room-name").innerText
+    });
+    chatInput.elements.m.value = "";
+    event.preventDefault(); // prevents page reloading
+});
+
+roomButtons.forEach(roomButton => {
+    roomButton.addEventListener("click", () => {
+        messages.innerHTML = "";
+        document.getElementById("room-name").innerText = roomButton.textContent.trim();
+        socket.emit("change room", roomButton.textContent.trim())
+    })
+});
+
+socket.on("set username", () => {
+    document.getElementById("chat-container").style.display = "block";
+    document.getElementById("chat-username-container").style.display = "none";
+});
+
 socket.on('chat message', messageHtml => {
+    let message = new DOMParser().parseFromString(messageHtml, "text/html").firstChild.lastChild.firstChild;
+    messages.appendChild(message);
+    messages.scrollIntoView(false)
+});
+
+socket.on('joined room', messageHtml => {
     let message = new DOMParser().parseFromString(messageHtml, "text/html").firstChild.lastChild.firstChild;
     messages.appendChild(message);
     messages.scrollIntoView(false)
