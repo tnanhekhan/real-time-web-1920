@@ -1,6 +1,8 @@
 const socket = io();
 const messages = document.getElementById("messages");
-const form = document.forms["chat-bar"]
+const chatInput = document.forms["chat-bar"]
+const chatUsernameInput = document.forms["chat-username-form"];
+const roomButtons = document.querySelectorAll(".room-button");
 
 const openChatButton = document.getElementById("open-chat-button");
 const closeChatButton = document.getElementById("close-chat-button");
@@ -9,10 +11,35 @@ const openParkingSpacesButton = document.getElementById("open-parking-spaces-but
 const closeParkingSpacesButton = document.getElementById("close-parking-spaces-button");
 
 // region chat logic
-form.addEventListener("submit", event => {
-    socket.emit('chat message', form.elements.m.value);
-    form.elements.m.value = "";
+document.getElementById("chat-container").style.display = "none";
+document.getElementById("chat-username-container").style.display = "block";
+
+chatUsernameInput.addEventListener("submit", event => {
+    socket.emit('set username', chatUsernameInput.elements["chat-username-input"].value);
+    chatUsernameInput.elements["chat-username-input"].value = "";
     event.preventDefault(); // prevents page reloading
+});
+
+chatInput.addEventListener("submit", event => {
+    socket.emit('chat message', {
+        message: chatInput.elements.m.value,
+        room: document.getElementById("room-name").innerText
+    });
+    chatInput.elements.m.value = "";
+    event.preventDefault(); // prevents page reloading
+});
+
+roomButtons.forEach(roomButton => {
+    roomButton.addEventListener("click", () => {
+        messages.innerHTML = "";
+        document.getElementById("room-name").innerText = roomButton.textContent.trim();
+        socket.emit("change room", roomButton.textContent.trim())
+    })
+});
+
+socket.on("set username", () => {
+    document.getElementById("chat-container").style.display = "block";
+    document.getElementById("chat-username-container").style.display = "none";
 });
 
 socket.on('chat message', messageHtml => {
@@ -21,8 +48,14 @@ socket.on('chat message', messageHtml => {
     messages.scrollIntoView(false)
 });
 
-socket.on('video', videoHtml => {
-    let video = new DOMParser().parseFromString(videoHtml, "text/html").lastChild.lastChild.firstChild
+socket.on('joined room', messageHtml => {
+    let message = new DOMParser().parseFromString(messageHtml, "text/html").firstChild.lastChild.firstChild;
+    messages.appendChild(message);
+    messages.scrollIntoView(false)
+});
+
+socket.on('media', mediaHtml => {
+    let video = new DOMParser().parseFromString(mediaHtml, "text/html").lastChild.lastChild.firstChild
     messages.appendChild(video);
     messages.scrollIntoView(false)
 });
@@ -50,7 +83,6 @@ let map = new ol.Map({
     view: mapView
 });
 
-// https://github.com/jonataswalker/ol-geocoder
 let geoCoder = new Geocoder('nominatim', {
     provider: 'osm',
     lang: 'nl-NL',
@@ -121,54 +153,52 @@ function showParkingSpaceInfo(lat, lng, coords) {
     document.getElementById("loader").style.display = "block";
     parkingSpaceInfo.style.display = "none";
 
-    fetch(`geo?lat=${lat}&lng=${lng}`)
-        .then(response => {
-            return response.json()
-        })
-        .then(data => {
-            document.getElementById("loader").style.display = "none";
-            const infoElements = parkingSpaceInfo.children;
-            if (data.isParkingSpace) {
-                infoElements["parking-space-info-title"].innerHTML = data.name;
-                infoElements["parking-space-info-subtitle"].innerHTML = data.id;
-                infoElements["parking-space-info-content"].innerHTML = data.details;
-                document.getElementById("parking-space-info-thumb").src = data.thumb;
+    socket.emit("fetch parkingSpaceInfo", {lat: lat, lng: lng, coords: coords});
+    socket.on("fetch parkingSpaceInfo", data => {
+        document.getElementById("loader").style.display = "none";
+        const infoElements = parkingSpaceInfo.children;
 
-                let isClaimed;
-                Array.from(document.getElementById("parking-space-available-container").children).forEach(child => {
-                    if (child.id === data.id) {
-                        isClaimed = true
-                    }
+        if (data.isParkingSpace) {
+            infoElements["parking-space-info-title"].innerHTML = data.name;
+            infoElements["parking-space-info-subtitle"].innerHTML = data.id;
+            infoElements["parking-space-info-content"].innerHTML = data.details;
+            document.getElementById("parking-space-info-thumb").src = data.thumb;
+
+            let isClaimed;
+            Array.from(document.getElementById("parking-space-available-container").children).forEach(child => {
+                if (child.id === data.id) {
+                    isClaimed = true
+                }
+            });
+
+            if (isClaimed) {
+                infoElements["parking-space-claim-button"].style.display = "none";
+                infoElements["parking-space-unclaim-button"].style.display = "block";
+            } else {
+                infoElements["parking-space-claim-button"].style.display = "block";
+                infoElements["parking-space-unclaim-button"].style.display = "none";
+            }
+
+            infoElements["parking-space-claim-button"].onclick = () => {
+                socket.emit("claim", {
+                    coordinates: coords,
+                    id: data.id,
+                    details: data.details,
+                    name: data.name
                 });
 
-                if (isClaimed) {
-                    infoElements["parking-space-claim-button"].style.display = "none";
-                    infoElements["parking-space-unclaim-button"].style.display = "block";
-                } else {
-                    infoElements["parking-space-claim-button"].style.display = "block";
-                    infoElements["parking-space-unclaim-button"].style.display = "none";
-                }
+                infoElements["parking-space-claim-button"].style.display = "none";
+                infoElements["parking-space-unclaim-button"].style.display = "block";
+            };
 
-                infoElements["parking-space-claim-button"].onclick = () => {
-                        socket.emit("claim", {
-                            coordinates: coords,
-                            id: data.id,
-                            details: data.details,
-                            name: data.name
-                        });
-
-                    infoElements["parking-space-claim-button"].style.display = "none";
-                    infoElements["parking-space-unclaim-button"].style.display = "block";
-                };
-
-                infoElements["parking-space-unclaim-button"].onclick = () => {
-                    socket.emit("unclaim", data.id);
-                    infoElements["parking-space-claim-button"].style.display = "block";
-                    infoElements["parking-space-unclaim-button"].style.display = "none";
-                };
-                parkingSpaceInfo.style.display = "block";
-            }
-        });
+            infoElements["parking-space-unclaim-button"].onclick = () => {
+                socket.emit("unclaim", data.id);
+                infoElements["parking-space-claim-button"].style.display = "block";
+                infoElements["parking-space-unclaim-button"].style.display = "none";
+            };
+            parkingSpaceInfo.style.display = "block";
+        }
+    });
 }
 
 // Get Lat Long from click
@@ -236,7 +266,7 @@ socket.on("unclaim", parkingSpaceId => {
     map.render();
 });
 
-socket.on("fetch", parkingSpaces => {
+socket.on("fetch claimedParkingSpaces", parkingSpaces => {
     parkingSpaces.forEach(parkingSpace => {
         addParkingSpaceToVector(parkingSpace)
         insertIntoParkingSpaceList(parkingSpace);

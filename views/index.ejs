@@ -8,40 +8,58 @@
             <i class="fas fa-times-circle"></i>
         </span>
     </a>
+    <article class="message is-dark" id="chat-username-container">
+        <div class="message-header">
+            <p>Enter a username for the chat</p>
+        </div>
+        <div class="message-body">
+            <form id="chat-username-form" action="">
+                <div class="field has-addons">
+                    <div class="control is-expanded">
+                        <input class="input" type="text" id="chat-username-input" autocomplete="off"
+                               placeholder="Enter a username" required/>
+                    </div>
+                    <div class="control">
+                        <input type="submit" class="button is-info" value="Send"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </article>
     <div class="container is-fluid" id="chat-container">
-        <div class="field is-grouped is-grouped-multiline">
+        <div class="field is-grouped is-grouped-multiline" id="chat-room-buttons">
             <p class="control">
-                <a class="button">
+                <a class="button room-button">
                     Centrum
                 </a>
             </p>
             <p class="control">
-                <a class="button">
+                <a class="button room-button">
                     Nieuw-West
                 </a>
             </p>
             <p class="control">
-                <a class="button">
+                <a class="button room-button">
                     Noord
                 </a>
             </p>
             <p class="control">
-                <a class="button">
+                <a class="button room-button">
                     Oost
                 </a>
             </p>
             <p class="control">
-                <a class="button">
+                <a class="button room-button">
                     West
                 </a>
             </p>
             <p class="control">
-                <a class="button">
+                <a class="button room-button">
                     Zuid
                 </a>
             </p>
             <p class="control">
-                <a class="button">
+                <a class="button room-button">
                     Zuidoost
                 </a>
             </p>
@@ -49,7 +67,7 @@
         <div class="container box" id="chatbox">
             <div class="tile-header">
                 <h1 class="title is-4">Room</h1>
-                <h1 class="subtitle is-6">Centrum</h1>
+                <h1 class="subtitle is-6" id="room-name">Centrum</h1>
             </div>
             <hr>
             <ul id="messages"></ul>
@@ -57,7 +75,8 @@
         <form id="chat-bar" action="">
             <div class="field has-addons">
                 <div class="control is-expanded">
-                    <input class="input" type="text" id="m" autocomplete="off" placeholder="Enter a message" required/>
+                    <input class="input" type="text" id="m" autocomplete="off" placeholder="Enter a message"
+                           required/>
                 </div>
                 <div class="control">
                     <a class="button is-primary">Send</a>
