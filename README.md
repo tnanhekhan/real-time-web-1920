@@ -31,7 +31,7 @@ Run `npm start` and go to `localhost:3002` to see the dev version running.
 Here is a link to the live version on Heroku: https://live-tangle.herokuapp.com/
 
 ## Data Lifecycle
-![Data flow diagram](docs/Data flow diagram.png "Data flow diagram")
+![Data flow diagram](docs/dataflow.png "Data flow diagram")
 
 ### Socket Events
 - `set username` sets a username for the chat
