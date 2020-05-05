@@ -61,11 +61,6 @@ io.on('connection', socket => {
         Zuidoost: "Zuidoost"
     }
 
-    console.log('a user connected');
-    socket.on('disconnect', () => {
-        console.log('user disconnected');
-    });
-
     socket.on("set username", username => {
         socket.username = `${username} (${socket.id})`
         socket.join(rooms.Centrum)
@@ -98,7 +93,7 @@ io.on('connection', socket => {
                             } else {
                                 io.to(data.room).emit('chat message', `<li><b>${socket.username}:</b> ${message}<a href='${result.data.url}'> ${result.data.title} from ${result.data["provider_name"]}</a></li>`);
                             }
-                            io.to(data.room).emit('video', result.data.html)
+                            io.to(data.room).emit('media', result.data.html)
                         } else {
                             // else check if included message is before or after the other url
                             if (matchedSubstring.length > 1) {

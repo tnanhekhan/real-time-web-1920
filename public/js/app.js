@@ -54,8 +54,8 @@ socket.on('joined room', messageHtml => {
     messages.scrollIntoView(false)
 });
 
-socket.on('video', videoHtml => {
-    let video = new DOMParser().parseFromString(videoHtml, "text/html").lastChild.lastChild.firstChild
+socket.on('media', mediaHtml => {
+    let video = new DOMParser().parseFromString(mediaHtml, "text/html").lastChild.lastChild.firstChild
     messages.appendChild(video);
     messages.scrollIntoView(false)
 });
@@ -83,7 +83,6 @@ let map = new ol.Map({
     view: mapView
 });
 
-// https://github.com/jonataswalker/ol-geocoder
 let geoCoder = new Geocoder('nominatim', {
     provider: 'osm',
     lang: 'nl-NL',
