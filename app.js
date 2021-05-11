@@ -115,12 +115,12 @@ io.on('connection', socket => {
 
     socket.on("fetch parkingSpaceInfo", data => {
         const endpoint = "https://api.data.amsterdam.nl";
-        axios.get(`${endpoint}/parkeervakken/geosearch/?lat=${data.lat}&lon=${data.lng}&item=parkeervak`)
+        axios.get(`${endpoint}/parkeervakken/geosearch/?lat=${data.lat}&lon=${data.lng}&item=parkeervak&format=json`)
             .then(geoSearch => {
                 const infoUrl = geoSearch.data[0]["_links"].self.href;
                 const multiPolygon = geoSearch.data[0].geometrie.coordinates;
 
-                axios.get(endpoint + infoUrl)
+                axios.get(endpoint + infoUrl + "?format=json")
                     .then(response => {
                         axios.get(`https://api.data.amsterdam.nl/panorama/thumbnail/?lat=${data.lat}&lon=${data.lng}`)
                             .then(thumbnail => {
@@ -132,9 +132,18 @@ io.on('connection', socket => {
                                     multiPolygon: multiPolygon,
                                     thumb: thumbnail.data.url
                                 });
+                            })
+                            .catch(err => {
+                                socket.emit("fetch parkingSpaceInfo", {
+                                    isParkingSpace: true,
+                                    name: `${response.data.straatnaam}`,
+                                    id: response.data.id,
+                                    details: `Type: ${response.data.type} Parking Space, Buurtcode: ${response.data.buurtcode}`,
+                                    multiPolygon: multiPolygon,
+                                    thumb: `https://i.pinimg.com/originals/62/61/5b/62615b10916e312085997ded4910f027.png`
+                                });
                             });
                     });
-
             }).catch(err => {
             socket.emit("fetch parkingSpaceInfo", {isParkingSpace: false});
         });
